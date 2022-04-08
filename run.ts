@@ -11,16 +11,15 @@ if (!args['o'] && !args['output']) {
 }
 
 const target = args['o'] || args['output'];
-const folder = args._[0];
+const folder = args._[0] as string;
 
 // Read strings.xml and build map
 let strings: Record<string, string> = {};
-const stringsPath = `${folder}/values/strings.xml`;
 try {
-    strings = await parseStrings(stringsPath);
+    strings = await parseStrings(folder);
 } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
-        console.warn(`Failed to open ${stringsPath}`)
+        console.warn(`Failed to open ${error.message}`)
     } else {
         throw error;
     }
@@ -28,12 +27,11 @@ try {
 
 // Read string-arrays from arrays.xml and build map. Replace values from strings maps
 let arrays: Record<string, string[]> = {};
-const arraysPath = `${folder}/values/arrays.xml`;
 try {
-    arrays = await parseStringArrays(arraysPath, strings);
+    arrays = await parseStringArrays(folder, strings);
 } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
-        console.warn(`Failed to open ${arraysPath}`)
+        console.warn(`Failed to open ${error.message}`)
     } else {
         throw error;
     }
