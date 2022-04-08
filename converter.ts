@@ -4,6 +4,9 @@ export function convert(
     arrays: Record<string, string[]>,
 ): any[] {
     const result: any[] = [];
+    if (!Array.isArray(restrictions)) {
+        restrictions = [restrictions];
+    }
     for (const restriction of restrictions) {
         // New object with key
         const o: any = { key: restriction["@android:key"] };
@@ -101,14 +104,7 @@ export function convert(
 
         // Check if there are sub restriction
         if (restriction["restriction"]) {
-            // Make sure we have an array for the recursive call
-            let sub = [];
-            if (Array.isArray(restriction["restriction"])) {
-                sub = restriction["restriction"];
-            } else {
-                sub = [restriction["restriction"]];
-            }
-            o.nestedProperties = convert(sub, strings, arrays);
+            o.nestedProperties = convert(restriction["restriction"], strings, arrays);
         }
 
         result.push(o);
