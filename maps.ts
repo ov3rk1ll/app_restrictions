@@ -33,13 +33,13 @@ export async function parseStringArrays(
       arrays[key] = [];
       for (const i of (n["item"] as string[])) {
         try {
-          if (i.startsWith("@string/")) {
+          if ((i + "").startsWith("@string/")) {
             arrays[key].push(strings[i]);
           } else {
             arrays[key].push(i);
           }
         } catch (err) {
-          throw new Error("Failed to parse " + i);
+          throw new Error("Failed to parse " + i + " - " + err.message);
         }
       }
     }
