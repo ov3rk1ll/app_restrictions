@@ -4,7 +4,7 @@ Convert a android.content.APP_RESTRICTIONS xml file to json as returned by https
 
 ## Run
 
-deno run --allow-read --allow-write run.ts [input res folder] --output [output file]
+deno run --allow-read --allow-write https://raw.githubusercontent.com/ov3rk1ll/app_restrictions/main/run.ts [input res folder] --output [output file]
 
 The _input res folder_ must point to the res folder containing xml/app_restrictions.xml, values/strings.xml, etc
 
