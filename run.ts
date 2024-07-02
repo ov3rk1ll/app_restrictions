@@ -3,48 +3,54 @@ import { parseStringArrays, parseStrings } from "./maps.ts";
 import { convert } from "./converter.ts";
 
 const args = argsParse(Deno.args);
-if (args._.length === 0) {
-  throw new Error("Input folder argument missing");
+
+if (args._.length === 0 && !args["i"] && !args["input"]) {
+  throw new Error("Input folder or file argument missing");
 }
 if (!args["o"] && !args["output"]) {
-  throw new Error("Putput file (-o or --output) argument missing");
+  throw new Error("Output file (-o or --output) argument missing");
 }
 
+const inputFile = args["i"] || args["input"];
 const target = args["o"] || args["output"];
-const folder = args._[0] as string;
+const folder = (args._[0] as string) ?? null;
 const format = args["format"] ?? "json";
 
-// Read strings.xml and build map
 let strings: Record<string, string> = {};
-try {
-  strings = await parseStrings(folder);
-} catch (error) {
-  if (error instanceof Deno.errors.NotFound) {
-    console.warn(`Failed to open ${error.message}`);
-  } else {
-    throw error;
-  }
-}
-
-// Read string-arrays from arrays.xml and build map. Replace values from strings maps
 let arrays: Record<string, string[]> = {};
-try {
-  arrays = await parseStringArrays(folder, strings);
-} catch (error) {
-  if (error instanceof Deno.errors.NotFound) {
-    console.warn(`Failed to open ${error.message}`);
-  } else {
-    throw error;
+
+if (folder != null) {
+  try {
+    // Read strings.xml and build map
+    strings = await parseStrings(folder);
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      console.warn(`Failed to open ${error.message}`);
+    } else {
+      throw error;
+    }
+  }
+
+  // Read string-arrays from arrays.xml and build map. Replace values from strings maps
+  try {
+    arrays = await parseStringArrays(folder, strings);
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      console.warn(`Failed to open ${error.message}`);
+    } else {
+      throw error;
+    }
   }
 }
 
 const filename = args["f"] || args["file"] || "app_restrictions.xml";
 let restrictions: Array<any> = [];
-const restrictionsPath = `${folder}/xml/${filename}`;
+const restrictionsPath = inputFile || `${folder}/xml/${filename}`;
 try {
   const restrictionsXml = await Deno.readTextFile(restrictionsPath);
+  const parsed = parse(restrictionsXml);
   restrictions = convert(
-    (parse(restrictionsXml).restrictions as any).restriction,
+    (parsed.restrictions as any).restriction,
     strings,
     arrays,
   );
